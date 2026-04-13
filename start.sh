@@ -48,4 +48,4 @@ cat > "$HOME/.openclaw/openclaw.json" <<EOF
 EOF
 
 echo "Starting OpenClaw on port $PORT"
-exec openclaw gateway --bind 0.0.0.0 --port "$PORT"
+exec openclaw gateway --bind custom --host 0.0.0.0 --port "$PORT"
