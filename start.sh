@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euxo pipefail
 
 export PORT="${PORT:-10000}"
 export HOME="${HOME:-/tmp/home}"
 mkdir -p "$HOME/.openclaw"
 
 export WORKSPACE_DIR="${WORKSPACE_DIR:-/tmp/workspace}"
-
 mkdir -p "$WORKSPACE_DIR"
 
 if [ -n "${WORKSPACE_REPO_URL:-}" ]; then
@@ -47,5 +46,14 @@ cat > "$HOME/.openclaw/openclaw.json" <<EOF
 }
 EOF
 
-echo "Starting OpenClaw on port $PORT"
-exec openclaw gateway --bind lan --port "$PORT" --token "$OPENCLAW_GATEWAY_TOKEN"
+echo "===== OPENCLAW CONFIG ====="
+cat "$HOME/.openclaw/openclaw.json"
+echo "===== ENV CHECK ====="
+echo "PORT=$PORT"
+echo "WORKSPACE_DIR=$WORKSPACE_DIR"
+echo "TELEGRAM_BOT_TOKEN_SET=${TELEGRAM_BOT_TOKEN:+yes}"
+echo "OPENAI_API_KEY_SET=${OPENAI_API_KEY:+yes}"
+echo "OPENCLAW_GATEWAY_TOKEN_SET=${OPENCLAW_GATEWAY_TOKEN:+yes}"
+echo "===== STARTING GATEWAY ====="
+
+openclaw gateway --bind lan --port "$PORT" --token "$OPENCLAW_GATEWAY_TOKEN"
