@@ -1,33 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export OPENCLAW_GATEWAY_PORT="${OPENCLAW_GATEWAY_PORT:-8080}"
-export OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-/tmp/.openclaw}"
-export OPENCLAW_WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-/tmp/workspace}"
-export OPENCLAW_MODEL="${OPENCLAW_MODEL:-openai/gpt-5.4}"
+export PORT="${PORT:-10000}"
+export HOME="${HOME:-/tmp/home}"
+mkdir -p "$HOME/.openclaw"
 
-mkdir -p "$OPENCLAW_STATE_DIR" "$OPENCLAW_WORKSPACE_DIR"
+export WORKSPACE_DIR="${WORKSPACE_DIR:-/tmp/workspace}"
+
+mkdir -p "$WORKSPACE_DIR"
 
 if [ -n "${WORKSPACE_REPO_URL:-}" ]; then
-  if [ ! -d "$OPENCLAW_WORKSPACE_DIR/.git" ]; then
-    git clone "$WORKSPACE_REPO_URL" "$OPENCLAW_WORKSPACE_DIR"
+  if [ ! -d "$WORKSPACE_DIR/.git" ]; then
+    git clone "$WORKSPACE_REPO_URL" "$WORKSPACE_DIR"
   else
-    git -C "$OPENCLAW_WORKSPACE_DIR" pull --ff-only || true
+    git -C "$WORKSPACE_DIR" pull --ff-only || true
   fi
 fi
 
-cat > "$OPENCLAW_STATE_DIR/openclaw.json" <<EOF
+cat > "$HOME/.openclaw/openclaw.json" <<EOF
 {
   "identity": {
     "name": "Jarvis",
     "theme": "assistente pessoal e técnico",
     "emoji": "🤖"
   },
-  "agent": {
-    "workspace": "$OPENCLAW_WORKSPACE_DIR",
-    "model": {
-      "primary": "$OPENCLAW_MODEL"
+  "agents": {
+    "defaults": {
+      "workspace": "$WORKSPACE_DIR"
     }
+  },
+  "model": {
+    "primary": "openai/gpt-5.4"
   },
   "channels": {
     "telegram": {
@@ -44,6 +47,5 @@ cat > "$OPENCLAW_STATE_DIR/openclaw.json" <<EOF
 }
 EOF
 
-export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"
-
-exec openclaw gateway --bind 0.0.0.0 --port "$OPENCLAW_GATEWAY_PORT"
+echo "Starting OpenClaw on port $PORT"
+exec openclaw gateway --bind 0.0.0.0 --port "$PORT"
